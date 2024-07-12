@@ -45,6 +45,7 @@ Follow the [Habitat Installation Guide](https://github.com/facebookresearch/habi
 
    ```bash
    conda create -n etpnav python=3.6
+   conda activate etpnav
    ```
 2. Install `habitat-sim` for a machine with multiple GPUs or without an attached display (i.e. a cluster):
 
