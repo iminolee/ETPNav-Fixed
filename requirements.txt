@@ -5,3 +5,7 @@ python-utils==3.3.3
 tensorboardx==2.4.1
 jsonlines
 networkx==2.5.1
+dtw
+fastdtw
+msgpack_numpy
+clip==0.1.0

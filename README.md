@@ -158,17 +158,17 @@ CUDA_VISIBLE_DEVICES=0,1 bash pretrain_src/run_pt/run_r2r.bash 2333
 Use `main.bash` for `Training/Evaluation/Inference with a single GPU or with multiple GPUs on a single node.` Simply adjust the arguments of the bash scripts:
 
 ```
-# for R2R-CE
-CUDA_VISIBLE_DEVICES=0,1 bash run_r2r/main.bash train 2333  # training
-CUDA_VISIBLE_DEVICES=0,1 bash run_r2r/main.bash eval  2333  # evaluation
-CUDA_VISIBLE_DEVICES=0,1 bash run_r2r/main.bash inter 2333  # inference
+# R2R-CE with a single GPU
+CUDA_VISIBLE_DEVICES=0 bash run_r2r/main.bash train 2333  # training
+CUDA_VISIBLE_DEVICES=0 bash run_r2r/main.bash eval  2333  # evaluation
+CUDA_VISIBLE_DEVICES=0 bash run_r2r/main.bash inter 2333  # inference
 ```
 
 ```
-# for RxR-CE
-CUDA_VISIBLE_DEVICES=0,1,2,3 bash run_rxr/main.bash train 2333  # training
-CUDA_VISIBLE_DEVICES=0,1,2,3 bash run_rxr/main.bash eval  2333  # evaluation
-CUDA_VISIBLE_DEVICES=0,1,2,3 bash run_rxr/main.bash inter 2333  # inference
+# RxR-CE with a single GPU
+CUDA_VISIBLE_DEVICES=0 bash run_rxr/main.bash train 2333  # training
+CUDA_VISIBLE_DEVICES=0 bash run_rxr/main.bash eval  2333  # evaluation
+CUDA_VISIBLE_DEVICES=0 bash run_rxr/main.bash inter 2333  # inference
 ```
 
 ## Contact Information
