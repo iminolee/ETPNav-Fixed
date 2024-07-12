@@ -21,25 +21,19 @@
 
 🔥Winner of the [RxR-Habitat Challenge](https://embodied-ai.org/cvpr2022) in CVPR 2022. [[Challenge Report]](https://arxiv.org/abs/2206.11610) [[Challenge Certificate]](https://marsaki.github.io/assets/cert/rxr-habitat-cert.pdf)
 
-This work tackles a practical yet challenging VLN setting - vision-language navigation in continuous environments (VLN-CE). To develop a robust VLN-CE agent, we propose a new navigation framework, ETPNav, which focuses on two critical skills: **1) the capability to abstract environments and generate long-range navigation plans, and 2) the ability of obstacle-avoiding control in continuous environments**. ETPNav performs online topological mapping of environments by self-organizing predicted waypoints along a traversed path, without prior environmental experience. It privileges the agent to break down the navigation procedure into high-level planning and low-level control. Concurrently, ETPNav utilizes a transformer-based cross-modal planner to generate navigation plans based on topological maps and instructions. The plan is then performed through an obstacle-avoiding controller that leverages a trial-and-error heuristic to prevent navigation from getting stuck in obstacles. Experimental results demonstrate the effectiveness of the proposed method. **ETPNav yields more than 10% and 20% improvements** over prior state-of-the-art on R2R-CE and RxR-CE datasets, respectively.
+## Repository Enhancements
+This repository addresses issues encountered while implementing the ETPNav original code and provides more detailed usage instructions, as well as information about the environment where the tests were conducted.
 
-<div align="center">
-    <img src="assets/overview.png", width="1000">
-    <img src="assets/mapping.png", width="1000">
-</div>
-
-Leadboard:
-
-<div align="center">
-    <img src="assets/sota.png", width="1000">
-</div>
-
-## TODOs
-
-* [X] Tidy and release the R2R-CE fine-tuning code.
-* [X] Tidy and release the RxR-CE fine-tuning code.
-* [X] Release the pre-training code.
-* [X] Release the checkpoints.
+### Testing Environment Details
+* System Specifications:
+  * Operating System: Ubuntu 20.04 LTS
+  * Processor: Intel Core i9-14900K
+  * Memory: 128GB RAM
+  * GPU : NVIDIA RTX A6000
+* Software Versions:
+  * Python: 3.6
+  * Anaconda3: 24.5.0
+  * Habitat :v0.1.7
 
 ## Setup
 
@@ -50,7 +44,7 @@ Follow the [Habitat Installation Guide](https://github.com/facebookresearch/habi
 1. Create a virtual environment. We develop this project with Python 3.6.
 
    ```bash
-   conda env create -f environment.yaml
+   conda create -n etpnav python=3.6
    ```
 2. Install `habitat-sim` for a machine with multiple GPUs or without an attached display (i.e. a cluster):
 
@@ -60,17 +54,21 @@ Follow the [Habitat Installation Guide](https://github.com/facebookresearch/habi
 3. Clone this repository and install all requirements for `habitat-lab`, VLN-CE and our experiments. Note that we specify `gym==0.21.0` because its latest version is not compatible with `habitat-lab-v0.1.7`.
 
    ```bash
-   git clone git@github.com:MarSaKi/ETPNav.git
-   cd ETPNav
-   python -m pip install -r requirements.txt
-   pip install torch==1.9.1+cu111 torchvision==0.10.1+cu111 -f https://download.pytorch.org/whl/torch_stable.html
+   git clone -b v0.1.7 https://github.com/facebookresearch/habitat-lab.git
+   cd habitat-lab
+   python -m pip install -r requirements.txt # Update gym version to gym==0.21.0 in requirements.txt
+   python -m pip install -r habitat_baselines/rl/requirements.txt
+   python -m pip install -r habitat_baselines/rl/ddppo/requirements.txt
+   # If an error occurs, install msgpack using pip
+   python setup.py develop --all
    ```
-4. Clone a stable `habitat-lab` version from the github repository and install. The command below will install the core of Habitat Lab as well as the habitat_baselines.
+4. Clone the `ETPNav-Fixed` repository and install all dependencies, including specific versions of PyTorch and torchvision with CUDA support.
 
    ```bash
-   git clone --branch v0.1.7 git@github.com:facebookresearch/habitat-lab.git
-   cd habitat-lab
-   python setup.py develop --all # install habitat and habitat_baselines
+   https://github.com/iminolee/ETPNav-Fixed.githabitat-lab.git
+   cd ETPNav-Fixed
+   python -m pip install -r requirements.txt
+   pip install torch==1.9.1+cu111 torchvision==0.10.1+cu111 -f https://download.pytorch.org/whl/torch_stable.html
    ```
 
 ### Scenes: Matterport3D
@@ -98,30 +96,63 @@ Extract such that it has the form `scene_datasets/mp3d/{scene}/{scene}.glb`. The
   unzip etp_ckpt.zip    # file/fold structure has been organized
   ```
 
-  overall, files and folds are organized as follows:
+## Running
+
+### Pre-training
+
+Download the pretraining datasets [[link]](https://www.dropbox.com/sh/u3lhng7t2gq36td/AABAIdFnJxhhCg2ItpAhMtUBa?dl=0) (the same one used in [DUET](https://github.com/cshizhe/VLN-DUET)) and precomputed features [[link]](https://drive.google.com/file/d/1D3Gd9jqRfF-NjlxDAQG_qwxTIakZlrWd/view?usp=sharing), unzip in folder `pretrain_src`
+
+Download the `model_LXRT.pth` file [[link]](https://drive.google.com/file/d/1ukqkumP75iiYbwMQ4N--hS-PhBXuznPR/view?usp=drive_link) and place it in the `pretrain_src/datasets/pretrained/LXMERT` folder.
+
+Overall, files and folds are organized as follows:
 
   ```
-  ETPNav
+  ETPNav-Fixed
   ├── data
   │   ├── datasets
   │   ├── logs
-  │   ├── scene_datasets
-  │   └── wp_pred
-  └── pretrained
-      └── ETP
+  │   ├── wp_pred 
+  │   └── scene_datasets
+  ├── pretrain_src
+  │   ├── img_features
+  │   ├── pretrain_src
+  │   ├── run_pt
+  │   └── datasets
+  │       ├── R2R
+  │       ├── R4R
+  │       ├── REVERIE
+  │       ├── SOON
+  │       └── pretrained
+  │           └── LXMERT
+  │               └── model_LXRT.pth
+  └──  pretrained  
+       └── ETP
   ```
 
-## Running
+Modify NUM_GPUS in `pretrain_src/run_pt/run_r2r.bash` to match your available GPUs.
+You can check the available GPUs using `nvidia-smi`.
 
-Pre-training
+```
+NODE_RANK=0
+NUM_GPUS=2
+outdir=pretrained/r2r_ce/mlm.sap_habitat_depth
 
-Download the pretraining datasets [[link]](https://www.dropbox.com/sh/u3lhng7t2gq36td/AABAIdFnJxhhCg2ItpAhMtUBa?dl=0) (the same one used in [DUET](https://github.com/cshizhe/VLN-DUET)) and precomputed features [[link]](https://drive.google.com/file/d/1D3Gd9jqRfF-NjlxDAQG_qwxTIakZlrWd/view?usp=sharing), unzip in folder `pretrain_src`
+# train
+python -m torch.distributed.launch \
+    --nproc_per_node=${NUM_GPUS} --node_rank $NODE_RANK --master_port=$1 \
+    pretrain_src/pretrain_src/train_r2r.py --world_size ${NUM_GPUS} \
+    --vlnbert cmt \
+    --model_config pretrain_src/run_pt/r2r_model_config_dep.json \
+    --config pretrain_src/run_pt/r2r_pretrain_habitat.json \
+    --output_dir $outdir
+```
+Also, modify `CUDA_VISIBLE_DEVICES` to specify which GPUs to use.
 
 ```
 CUDA_VISIBLE_DEVICES=0,1 bash pretrain_src/run_pt/run_r2r.bash 2333
 ```
 
-Finetuning and Evaluation
+### Finetuning and Evaluation
 
 Use `main.bash` for `Training/Evaluation/Inference with a single GPU or with multiple GPUs on a single node.` Simply adjust the arguments of the bash scripts:
 
@@ -139,20 +170,20 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 bash run_rxr/main.bash eval  2333  # evaluation
 CUDA_VISIBLE_DEVICES=0,1,2,3 bash run_rxr/main.bash inter 2333  # inference
 ```
 
-# Contact Information
+## Contact Information
 
 * dong DOT an AT cripac DOT ia DOT ac DOT cn, [Dong An](https://marsaki.github.io/)
 * hanqingwang AT bit DOT edu DOT cn, [Hanqing Wang](https://hanqingwangai.github.io/)
 * wenguanwang DOT ai AT gmail DOT com, [Wenguan Wang](https://sites.google.com/view/wenguanwang)
 * yhuang AT nlpr DOT ia DOT ac DOT cn, [Yan Huang](https://yanrockhuang.github.io/)
 
-# Acknowledge
+## Acknowledge
 
-Our implementations are partially inspired by [CWP](https://github.com/YicongHong/Discrete-Continuous-VLN), [Sim2Sim ](https://github.com/jacobkrantz/Sim2Sim-VLNCE)and [DUET](https://github.com/cshizhe/VLN-DUET).
+Our implementations are partially inspired by [CWP](https://github.com/YicongHong/Discrete-Continuous-VLN), [Sim2Sim](https://github.com/jacobkrantz/Sim2Sim-VLNCE)and [DUET](https://github.com/cshizhe/VLN-DUET).
 
 Thanks for their great works!
 
-# Citation
+## Citation
 
 If you find this repository is useful, please consider citing our paper:
 
